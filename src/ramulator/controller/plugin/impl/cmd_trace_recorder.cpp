@@ -50,6 +50,18 @@ class CmdTraceRecorder : public IControllerPlugin, public Implementation {
   }
 
   void on_issue(const Request& req) override {
+
+    ///*  Added by Rachmad: begin
+    const auto& cmd_names =
+        m_ctrl->m_device.m_spec->command_names;
+    const std::string& command = cmd_names[req.command];
+    if (command == "PREpb" ||
+        command == "PREab" ||
+        command == "CAS_RD" ||
+        command == "CAS_WR") {
+        return;
+    } ///* Added by Rachmad: end
+
     if (m_binary) {
       write_binary_record(req);
     } else {
@@ -72,21 +84,57 @@ class CmdTraceRecorder : public IControllerPlugin, public Implementation {
 
   // ── Text mode ──────────────────────────────────────────────────────
 
+  ///* Original
+  // void write_text_header(const DRAMSpec& spec) {
+  //   m_file << "clock,command";
+  //   for (const auto& name : spec.level_names) {
+  //     m_file << "," << name;
+  //   }
+  //   m_file << ",type,source\n";
+  // }
+  //
+  ///* Edited by Rachmad
   void write_text_header(const DRAMSpec& spec) {
-    m_file << "clock,command";
-    for (const auto& name : spec.level_names) {
-      m_file << "," << name;
-    }
-    m_file << ",type,source\n";
+    // m_file << "clock,command";
+    // int check = 0; 
+    // for (const auto& name : spec.level_names) {
+    //   if (check != 0) { 
+    //     m_file << "," << name;
+    //   }
+    //   check++;
+    // }
+    // m_file << ",type\n";
+    return;
   }
 
+  ///* Original
+  // void write_text_record(const Request& req) {
+  //   const auto& cmd_names = m_ctrl->m_device.m_spec->command_names;
+  //   m_file << m_ctrl->m_clk << "," << cmd_names[req.command];
+  //   for (int i = 0; i < m_level_count; i++) {
+  //     m_file << "," << req.addr_vec[i];
+  //   }
+  //   m_file << "," << req.type_id << "," << req.source_id << "\n";
+  // }
+  //
+  ///* Edited by Rachmad
   void write_text_record(const Request& req) {
     const auto& cmd_names = m_ctrl->m_device.m_spec->command_names;
-    m_file << m_ctrl->m_clk << "," << cmd_names[req.command];
-    for (int i = 0; i < m_level_count; i++) {
-      m_file << "," << req.addr_vec[i];
+    if (cmd_names[req.command] != "ACT2") {
+      m_file << m_ctrl->m_clk << "," << cmd_names[req.command];
+      for (int i = 0; i < m_level_count; i++) {
+        printf("i: %d, addr_vec: %d\n", i, req.addr_vec[i]);
+        if (i != 0) { 
+            m_file << "," << req.addr_vec[i];
+        }
+      }
+      if (cmd_names[req.command]=="RD" || (cmd_names[req.command]=="WR")){
+        m_file << "," << "0x0000000000000000" << "," << req.source_id << "\n"; 
+      }
+      else {
+        m_file << "," << req.type_id << "," << req.source_id << "\n";
+      }
     }
-    m_file << "," << req.type_id << "," << req.source_id << "\n";
   }
 
   // ── Binary mode ────────────────────────────────────────────────────

@@ -19,7 +19,8 @@ services:
     volumes:
       - .:/workspace:cached
     working_dir: /workspace
-    user: vscode
+    ###ori### user: vscode
+    user: "${HOST_UID:-1000}:${HOST_GID:-1000}"
     command: bash -c "rm -f /tmp/ramulator2-ready && bash .devcontainer/post-create.sh && touch /tmp/ramulator2-ready && sleep infinity"
     healthcheck:
       test: ["CMD-SHELL", "test -f /tmp/ramulator2-ready"]

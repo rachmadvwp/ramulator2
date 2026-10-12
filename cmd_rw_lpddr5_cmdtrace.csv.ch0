@@ -1,0 +1,6 @@
+clock,command,Channel,Rank,BankGroup,Bank,Row,Column,type,source
+1,ACT1,0,0,3,3,32767,63,0,-1
+2,ACT2,0,0,3,3,32767,63,0,-1
+14,CAS_RD,0,0,3,3,32767,63,0,-1
+15,RD,0,0,3,3,32767,63,0,-1
+28,WR,0,0,3,3,32767,63,1,-1
